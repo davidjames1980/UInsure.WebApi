@@ -5,7 +5,7 @@ VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UInsure.WebApi.DavidJames", "UInsure.WebApi.DavidJames\UInsure.WebApi.DavidJames.csproj", "{F07C840C-CAA9-4460-853D-26B5FE43799E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UInsure.WebApi.DavidJames.DataModels", "UInsure.WebApi.DavidJames.Entities\UInsure.WebApi.DavidJames.DataModels.csproj", "{3BAF88AA-3D81-442D-8D6E-6902257464DA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UInsure.WebApi.DavidJames.Entities", "UInsure.WebApi.DavidJames.Entities\UInsure.WebApi.DavidJames.Entities.csproj", "{3BAF88AA-3D81-442D-8D6E-6902257464DA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UInsure.WebApi.DavidJames.Data", "UInsure.WebApi.DavidJames.Data\UInsure.WebApi.DavidJames.Data.csproj", "{DE8D3B03-B407-461D-BFAD-F2C7270DE95C}"
 EndProject

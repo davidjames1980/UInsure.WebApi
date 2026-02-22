@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\UInsure.WebApi.DavidJames.Data\UInsure.WebApi.DavidJames.Data.csproj" />
-    <ProjectReference Include="..\UInsure.WebApi.DavidJames.Entities\UInsure.WebApi.DavidJames.DataModels.csproj" />
+    <ProjectReference Include="..\UInsure.WebApi.DavidJames.Entities\UInsure.WebApi.DavidJames.Entities.csproj" />
     <ProjectReference Include="..\UInsure.WebApi.DavidJames.Models\UInsure.WebApi.DavidJames.Models.csproj" />
   </ItemGroup>
 

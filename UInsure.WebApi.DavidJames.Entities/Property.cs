@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace UInsure.WebApi.DavidJames.DataModels
+namespace UInsure.WebApi.DavidJames.Entities
 {
     public class Property
     {

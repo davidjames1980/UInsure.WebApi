@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using UInsure.WebApi.DavidJames.DataModels;
+using UInsure.WebApi.DavidJames.Entities;
 using UInsure.WebApi.DavidJames.Models;
 
 namespace UInsure.WebApi.DavidJames

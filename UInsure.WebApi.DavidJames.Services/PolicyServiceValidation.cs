@@ -1,4 +1,4 @@
-﻿using UInsure.WebApi.DavidJames.DataModels;
+﻿using UInsure.WebApi.DavidJames.Entities;
 using UInsure.WebApi.DavidJames.Models;
 using UInsure.WebApi.DavidJames.Services.Exceptions;
 using UInsure.WebApi.DavidJames.Services.Extensions;

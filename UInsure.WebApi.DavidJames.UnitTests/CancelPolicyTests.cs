@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using UInsure.WebApi.DavidJames.DataModels;
+using UInsure.WebApi.DavidJames.Entities;
 using UInsure.WebApi.DavidJames.Services.Exceptions;
 
 namespace UInsure.WebApi.DavidJames.Tests.Services

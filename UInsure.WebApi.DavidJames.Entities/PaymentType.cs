@@ -1,4 +1,4 @@
-﻿namespace UInsure.WebApi.DavidJames.DataModels
+﻿namespace UInsure.WebApi.DavidJames.Entities
 {
     public enum PaymentType
     {
