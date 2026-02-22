@@ -1,96 +1,401 @@
-@UInsure.WebApi.DavidJames_HostAddress = http://localhost:5298
-
 @baseUrl = http://localhost:5298
-@validPolicyRef = POL-3000
-@unknownPolicyRef = POL-DOES-NOT-EXIST
+@validUniqueReference = POL-2024-001
+@nonExistentReference = POL-DOES-NOT-EXIST
+@cancelledReference = POL-2024-CANCELLED
+@futureDate = 2025-06-01T00:00:00+00:00
+@pastDate = 2024-01-01T00:00:00+00:00
+@todayDate = 2025-02-22T00:00:00+00:00
 
-############################################################
-# SELL POLICY - HAPPY PATH (FULL MODEL)
-############################################################
+###############################################
+# SELL POLICY - POST /api/policies
+###############################################
+
+### [POSITIVE] Sell a valid policy with all fields populated
 POST {{baseUrl}}/api/policies
 Content-Type: application/json
-Accept: application/json
 
 {
-  "uniqueReference": "{{validPolicyRef}}",
-  "startDate": "2026-02-22T00:00:00Z",
-  "endDate": "2027-02-22T00:00:00Z",
-  "amount": 750.00,
+  "uniqueReference": "{{validUniqueReference}}",
+  "startDate": "2025-01-01T00:00:00",
+  "endDate": "2026-01-01T00:00:00",
+  "amount": 499.99,
   "hasClaims": false,
   "autoRenew": true,
+  "paymentType": 0,
   "policyholders": [
     {
       "firstName": "David",
       "lastName": "James",
-      "dateOfBirth": "1985-04-12T00:00:00Z"
+      "dateOfBirth": "1985-06-15T00:00:00"
     }
   ],
   "property": {
-    "addressLine1": "10 Dev Street",
-    "addressLine2": "Flat 2",
-    "addressLine3": "Liverpool",
-    "postcode": "L1 1XX"
-  },
-  "paymentType": 0
+    "addressLine1": "123 Test Street",
+    "addressLine2": "Testville",
+    "addressLine3": "Greater Manchester",
+    "postcode": "M1 1AA"
+  }
 }
 
 ###
 
-############################################################
-# GET POLICY - SHOULD RETURN FULL OBJECT
-############################################################
-GET {{baseUrl}}/api/policies/{{validPolicyRef}}
-Accept: application/json
-
-###
-
-############################################################
-# CANCELLATION QUOTE
-############################################################
-GET {{baseUrl}}/api/policies/{{validPolicyRef}}/cancellation-quote?CancellationDate=2026-06-01T00:00:00Z
-Accept: application/json
-
-###
-
-############################################################
-# RENEWAL ELIGIBILITY
-############################################################
-GET {{baseUrl}}/api/policies/{{validPolicyRef}}/renewal-eligibility
-Accept: application/json
-
-###
-
-############################################################
-# RENEW POLICY
-############################################################
-POST {{baseUrl}}/api/policies/{{validPolicyRef}}/renewals
-Accept: application/json
-
-###
-
-############################################################
-# CANCEL POLICY
-############################################################
-POST {{baseUrl}}/api/policies/{{validPolicyRef}}/cancellation
+### [POSITIVE] Sell a policy with DirectDebit payment type and multiple policyholders
+POST {{baseUrl}}/api/policies
 Content-Type: application/json
-Accept: application/json
 
 {
-  "cancellationDate": "2026-06-01T00:00:00Z"
+  "uniqueReference": "POL-2024-002",
+  "startDate": "2025-03-01T00:00:00",
+  "endDate": "2026-03-01T00:00:00",
+  "amount": 750.00,
+  "hasClaims": false,
+  "autoRenew": false,
+  "paymentType": 1,
+  "policyholders": [
+    {
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "dateOfBirth": "1990-04-20T00:00:00"
+    },
+    {
+      "firstName": "John",
+      "lastName": "Smith",
+      "dateOfBirth": "1988-11-05T00:00:00"
+    }
+  ],
+  "property": {
+    "addressLine1": "456 Example Road",
+    "addressLine2": "",
+    "addressLine3": "Birmingham",
+    "postcode": "B1 2AB"
+  }
 }
 
 ###
 
-############################################################
-# GET POLICY - AFTER CANCELLATION
-############################################################
-GET {{baseUrl}}/api/policies/{{validPolicyRef}}
-Accept: application/json
+### [POSITIVE] Sell a policy with Cheque payment and has claims
+POST {{baseUrl}}/api/policies
+Content-Type: application/json
+
+{
+  "uniqueReference": "POL-2024-003",
+  "startDate": "2025-01-01T00:00:00",
+  "endDate": "2026-01-01T00:00:00",
+  "amount": 1200.00,
+  "hasClaims": true,
+  "autoRenew": false,
+  "paymentType": 2,
+  "policyholders": [
+    {
+      "firstName": "Alice",
+      "lastName": "Brown",
+      "dateOfBirth": "1975-09-30T00:00:00"
+    }
+  ],
+  "property": {
+    "addressLine1": "789 Sample Lane",
+    "addressLine2": "Sampletown",
+    "addressLine3": "London",
+    "postcode": "SW1A 1AA"
+  }
+}
 
 ###
 
-############################################################
-# NOT FOUND TEST
-############################################################
-GET {{baseUrl}}/api/policies/{{unknownPolicyRef}}
-Accept: application/json
+### [NEGATIVE] Sell a policy with a duplicate unique reference (expect 422)
+POST {{baseUrl}}/api/policies
+Content-Type: application/json
+
+{
+  "uniqueReference": "{{validUniqueReference}}",
+  "startDate": "2025-01-01T00:00:00",
+  "endDate": "2026-01-01T00:00:00",
+  "amount": 499.99,
+  "hasClaims": false,
+  "autoRenew": true,
+  "paymentType": 0,
+  "policyholders": [
+    {
+      "firstName": "David",
+      "lastName": "James",
+      "dateOfBirth": "1985-06-15T00:00:00"
+    }
+  ],
+  "property": {
+    "addressLine1": "123 Test Street",
+    "addressLine2": "Testville",
+    "addressLine3": "Greater Manchester",
+    "postcode": "M1 1AA"
+  }
+}
+
+###
+
+### [NEGATIVE] Sell a policy with end date before start date (expect 422)
+POST {{baseUrl}}/api/policies
+Content-Type: application/json
+
+{
+  "uniqueReference": "POL-2024-BADDATES",
+  "startDate": "2026-01-01T00:00:00",
+  "endDate": "2025-01-01T00:00:00",
+  "amount": 499.99,
+  "hasClaims": false,
+  "autoRenew": true,
+  "paymentType": 0,
+  "policyholders": [
+    {
+      "firstName": "Bad",
+      "lastName": "Dates",
+      "dateOfBirth": "1985-06-15T00:00:00"
+    }
+  ],
+  "property": {
+    "addressLine1": "1 Bad Date Street",
+    "addressLine2": "",
+    "addressLine3": "London",
+    "postcode": "EC1A 1BB"
+  }
+}
+
+###
+
+### [NEGATIVE] Sell a policy with zero amount (expect 422)
+POST {{baseUrl}}/api/policies
+Content-Type: application/json
+
+{
+  "uniqueReference": "POL-2024-ZEROAMT",
+  "startDate": "2025-01-01T00:00:00",
+  "endDate": "2026-01-01T00:00:00",
+  "amount": 0,
+  "hasClaims": false,
+  "autoRenew": true,
+  "paymentType": 0,
+  "policyholders": [],
+  "property": {
+    "addressLine1": "1 Zero Amount Street",
+    "addressLine2": "",
+    "addressLine3": "London",
+    "postcode": "EC1A 1BB"
+  }
+}
+
+###
+
+### [EXCEPTION] Sell a policy with missing required uniqueReference (expect 400)
+POST {{baseUrl}}/api/policies
+Content-Type: application/json
+
+{
+  "startDate": "2025-01-01T00:00:00",
+  "endDate": "2026-01-01T00:00:00",
+  "amount": 499.99,
+  "hasClaims": false,
+  "autoRenew": true,
+  "paymentType": 0,
+  "policyholders": [],
+  "property": {}
+}
+
+###
+
+### [EXCEPTION] Sell a policy with malformed JSON body (expect 400)
+POST {{baseUrl}}/api/policies
+Content-Type: application/json
+
+{
+  "uniqueReference": "POL-2024-BAD"
+  "startDate": "not-a-date"
+  "amount": "not-a-number"
+}
+
+###
+
+
+###############################################
+# GET POLICY - GET /api/policies/{uniqueReference}
+###############################################
+
+### [POSITIVE] Get an existing policy
+GET {{baseUrl}}/api/policies/{{validUniqueReference}}
+
+###
+
+### [POSITIVE] Get a second existing policy
+GET {{baseUrl}}/api/policies/POL-2024-002
+
+###
+
+### [NEGATIVE] Get a policy that does not exist (expect 404)
+GET {{baseUrl}}/api/policies/{{nonExistentReference}}
+
+###
+
+### [EXCEPTION] Get a policy with special characters in reference
+GET {{baseUrl}}/api/policies/POL-!@£$%^&*()
+
+###
+
+
+###############################################
+# CANCEL POLICY - POST /api/policies/{uniqueReference}/cancellation
+###############################################
+
+### [POSITIVE] Cancel a valid policy with a future cancellation date
+POST {{baseUrl}}/api/policies/{{validUniqueReference}}/cancellation
+Content-Type: application/json
+
+{
+  "cancellationDate": "{{futureDate}}"
+}
+
+###
+
+### [POSITIVE] Cancel a policy with today's date
+POST {{baseUrl}}/api/policies/POL-2024-002/cancellation
+Content-Type: application/json
+
+{
+  "cancellationDate": "{{todayDate}}"
+}
+
+###
+
+### [NEGATIVE] Cancel a policy with a past cancellation date (expect 422)
+POST {{baseUrl}}/api/policies/{{validUniqueReference}}/cancellation
+Content-Type: application/json
+
+{
+  "cancellationDate": "{{pastDate}}"
+}
+
+###
+
+### [NEGATIVE] Cancel a policy that does not exist (expect 404)
+POST {{baseUrl}}/api/policies/{{nonExistentReference}}/cancellation
+Content-Type: application/json
+
+{
+  "cancellationDate": "{{futureDate}}"
+}
+
+###
+
+### [NEGATIVE] Cancel an already cancelled policy (expect 422)
+POST {{baseUrl}}/api/policies/{{cancelledReference}}/cancellation
+Content-Type: application/json
+
+{
+  "cancellationDate": "{{futureDate}}"
+}
+
+###
+
+### [EXCEPTION] Cancel a policy with malformed date (expect 400)
+POST {{baseUrl}}/api/policies/{{validUniqueReference}}/cancellation
+Content-Type: application/json
+
+{
+  "cancellationDate": "this-is-not-a-date"
+}
+
+###
+
+### [EXCEPTION] Cancel a policy with empty body (expect 400)
+POST {{baseUrl}}/api/policies/{{validUniqueReference}}/cancellation
+Content-Type: application/json
+
+{}
+
+###
+
+
+###############################################
+# CANCELLATION QUOTE - GET /api/policies/{uniqueReference}/cancellation-quote
+###############################################
+
+### [POSITIVE] Get a cancellation quote for a future date
+GET {{baseUrl}}/api/policies/{{validUniqueReference}}/cancellation-quote?cancellationDate={{futureDate}}
+
+###
+
+### [POSITIVE] Get a cancellation quote for today
+GET {{baseUrl}}/api/policies/POL-2024-002/cancellation-quote?cancellationDate={{todayDate}}
+
+###
+
+### [NEGATIVE] Get a cancellation quote for a non-existent policy (expect 404)
+GET {{baseUrl}}/api/policies/{{nonExistentReference}}/cancellation-quote?cancellationDate={{futureDate}}
+
+###
+
+### [NEGATIVE] Get a cancellation quote with a past date (expect 422)
+GET {{baseUrl}}/api/policies/{{validUniqueReference}}/cancellation-quote?cancellationDate={{pastDate}}
+
+###
+
+### [EXCEPTION] Get a cancellation quote with no date provided (expect 400)
+GET {{baseUrl}}/api/policies/{{validUniqueReference}}/cancellation-quote
+
+###
+
+### [EXCEPTION] Get a cancellation quote with malformed date (expect 400)
+GET {{baseUrl}}/api/policies/{{validUniqueReference}}/cancellation-quote?cancellationDate=not-a-date
+
+###
+
+
+###############################################
+# RENEWAL ELIGIBILITY - GET /api/policies/{uniqueReference}/renewal-eligibility
+###############################################
+
+### [POSITIVE] Check renewal eligibility for an eligible policy
+GET {{baseUrl}}/api/policies/{{validUniqueReference}}/renewal-eligibility
+
+###
+
+### [POSITIVE] Check renewal eligibility for a policy with claims
+GET {{baseUrl}}/api/policies/POL-2024-003/renewal-eligibility
+
+###
+
+### [NEGATIVE] Check renewal eligibility for a non-existent policy (expect 404)
+GET {{baseUrl}}/api/policies/{{nonExistentReference}}/renewal-eligibility
+
+###
+
+### [NEGATIVE] Check renewal eligibility for a cancelled policy (expect 422)
+GET {{baseUrl}}/api/policies/{{cancelledReference}}/renewal-eligibility
+
+###
+
+
+###############################################
+# RENEW POLICY - POST /api/policies/{uniqueReference}/renewals
+###############################################
+
+### [POSITIVE] Renew an eligible policy
+POST {{baseUrl}}/api/policies/{{validUniqueReference}}/renewals
+
+###
+
+### [NEGATIVE] Renew a policy that does not exist (expect 404)
+POST {{baseUrl}}/api/policies/{{nonExistentReference}}/renewals
+
+###
+
+### [NEGATIVE] Renew a policy that is not eligible e.g. has claims or autoRenew is false (expect 422)
+POST {{baseUrl}}/api/policies/POL-2024-003/renewals
+
+###
+
+### [NEGATIVE] Renew an already renewed policy (expect 422)
+POST {{baseUrl}}/api/policies/{{validUniqueReference}}/renewals
+
+###
+
+### [NEGATIVE] Renew a cancelled policy (expect 422)
+POST {{baseUrl}}/api/policies/{{cancelledReference}}/renewals
+
+###
