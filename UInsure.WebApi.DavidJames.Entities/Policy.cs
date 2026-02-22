@@ -6,6 +6,8 @@ namespace UInsure.WebApi.DavidJames.Entities
     {
         [Key]
         public int Id { get; set; }
+
+        [Required]
         public required string UniqueReference { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }

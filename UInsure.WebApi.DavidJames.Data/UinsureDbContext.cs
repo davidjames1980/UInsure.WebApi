@@ -31,6 +31,8 @@ namespace UInsure.WebApi.DavidJames.Data
                 .HasOne(p => p.Payment)
                 .WithOne(p => p.Policy)
                 .HasForeignKey<Payment>(p => p.PolicyId);
+
+            modelBuilder.ApplyConfiguration(new PolicyConfiguration());
         }
     }
 }
