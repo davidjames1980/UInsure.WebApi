@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using UInsure.WebApi.DavidJames.Models;
+using UInsure.WebApi.DavidJames.Models.Requests;
 using UInsure.WebApi.DavidJames.Services;
 using UInsure.WebApi.DavidJames.Services.Exceptions;
 
@@ -20,8 +21,8 @@ namespace UInsure.WebApi.DavidJames.Controllers
     /// Unhandled exceptions (expectional exceptions!) we want to flow through to our exception handler and we certainly don't want to be showing
     /// call stacks etc so 500 it when not in dev
     /// 
-    /// It is completely debatable if Conflict 409 is the best result to send but I've chosen this for new based on its definition. 'I cannot complete
-    /// the request for this reason - nothing has exploded. We just cannot complete it.' :)
+    /// It is completely debatable if UnprocessableEntity 422 is the best result to send but I've chosen this for new based on its definition. 'I cannot complete
+    /// the request for this reason - nothing has exploded. We just cannot process it.' :)
     /// 
     /// </summary>
     [ApiController]
@@ -35,7 +36,7 @@ namespace UInsure.WebApi.DavidJames.Controllers
             _policyService = policyService;
         }
 
-        [HttpPost("sell")]
+        [HttpPost]
         public async Task<IActionResult> SellPolicy([FromBody] PolicyModel policy)
         {
             try
@@ -43,15 +44,19 @@ namespace UInsure.WebApi.DavidJames.Controllers
                 var result = await _policyService.SellPolicy(policy);
 
                 // Since the requirements and the rest of the API depends on unique reference, I see no
-                // reason to return much more than a conformation. For security we don't want to expose anything more than is required.
+                // reason to return much more than a conformation of created (201). For security we don't want to expose anything more than is required.
                 //
                 // With regard to successful changes I like to return something useful (although uniqueRef isn't useful as the caller created it
                 // - I'll raise this question in the further docs) plus a human message.
-                return Ok(new { uniqueReference = result.UniqueReference, message = $"Policy '{policy.UniqueReference}' created successfully." });
+                return CreatedAtAction(
+                    nameof(GetPolicy),
+                        new { uniqueReference = result.UniqueReference },
+                        new { uniqueReference = result.UniqueReference, message = $"Policy '{policy.UniqueReference}' created successfully." }
+                );
             }
             catch (GeneralApiException ex)
             {
-                return Conflict(ex.Message);
+                return UnprocessableEntity(ex.Message);
             }
             catch (PolicyNotFoundException)
             {
@@ -62,14 +67,16 @@ namespace UInsure.WebApi.DavidJames.Controllers
         /// <summary>
         /// Anything involving DateTime can be trix because we get tunnel vision sometimes
         /// and think everyone works on GMT, UK formats or assuming they are using .NET for that matter. Date-times can be a nightmare
-        /// so we KISS and entrust.
+        /// so we are going to use datetime offset and a request model for maintainability
+        /// 
+        /// There is also an argument this could be PATCH since I'd image we don't delete the resource.  We would mark it as cancelled
         /// </summary>
-        [HttpPost("{uniqueReference}/cancel")]
-        public async Task<IActionResult> CancelPolicy(string uniqueReference, [FromBody] DateTime cancellationDate)
+        [HttpPost("{uniqueReference}/cancellation")]
+        public async Task<IActionResult> CancelPolicy(string uniqueReference, [FromBody] CancelPolicyRequest cancelPolicyRequest)
         {
             try
             {
-                var refundAmount = await _policyService.CancelPolicy(uniqueReference, cancellationDate);
+                var refundAmount = await _policyService.CancelPolicy(uniqueReference, cancelPolicyRequest.CancellationDate.UtcDateTime);
                 return Ok(new
                 {
                     uniqueReference,
@@ -79,7 +86,7 @@ namespace UInsure.WebApi.DavidJames.Controllers
             }
             catch (GeneralApiException ex)
             {
-                return Conflict(ex.Message);
+                return UnprocessableEntity(ex.Message);
             }
             catch (PolicyNotFoundException)
             {
@@ -87,7 +94,7 @@ namespace UInsure.WebApi.DavidJames.Controllers
             }
         }
 
-        [HttpPost("{uniqueReference}/renew")]
+        [HttpPost("{uniqueReference}/renewals")]
         public async Task<IActionResult> RenewPolicy(string uniqueReference)
         {
             try
@@ -99,7 +106,7 @@ namespace UInsure.WebApi.DavidJames.Controllers
 
             catch (GeneralApiException ex)
             {
-                return Conflict(ex.Message);
+                return UnprocessableEntity(ex.Message);
             }
             catch (PolicyNotFoundException)
             {
@@ -107,17 +114,19 @@ namespace UInsure.WebApi.DavidJames.Controllers
             }
         }
 
-        [HttpGet("{uniqueReference}/quote-cancellation-refund")]
-        public async Task<IActionResult> CalculateCancellationRefund(string uniqueReference, [FromQuery] DateTime cancellationDate)
+        [HttpGet("{uniqueReference}/cancellation-quote")]
+        public async Task<IActionResult> CalculateCancellationRefund(string uniqueReference, [FromQuery] CancelPolicyRequest cancellationQuoteRequest)
         {
             try
             {
-                var refundAmount = await _policyService.CalculateCancellationRefund(uniqueReference, cancellationDate);
+                var refundAmount = await _policyService.CalculateCancellationRefund(uniqueReference, 
+                    cancellationQuoteRequest.CancellationDate.UtcDateTime);
+                
                 return Ok(new { RefundAmount = refundAmount });
             }
             catch (GeneralApiException ex)
             {
-                return Conflict(ex.Message);
+                return UnprocessableEntity(ex.Message);
             }
             catch (PolicyNotFoundException)
             {
@@ -125,7 +134,7 @@ namespace UInsure.WebApi.DavidJames.Controllers
             }
         }
 
-        [HttpGet("{uniqueReference}/can-rewew")]
+        [HttpGet("{uniqueReference}/renewal-eligibility")]
         public async Task<IActionResult> CanRenewPolicy(string uniqueReference)
         {
             try
@@ -135,7 +144,7 @@ namespace UInsure.WebApi.DavidJames.Controllers
             }
             catch (GeneralApiException ex)
             {
-                return Conflict(ex.Message);
+                return UnprocessableEntity(ex.Message);
             }
             catch (PolicyNotFoundException)
             {
@@ -153,7 +162,7 @@ namespace UInsure.WebApi.DavidJames.Controllers
             }
             catch (GeneralApiException ex)
             {
-                return Conflict(ex.Message);
+                return UnprocessableEntity(ex.Message);
             }
             catch (PolicyNotFoundException)
             {

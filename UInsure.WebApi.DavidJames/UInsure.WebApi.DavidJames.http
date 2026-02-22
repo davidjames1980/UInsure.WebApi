@@ -1,6 +1,96 @@
 @UInsure.WebApi.DavidJames_HostAddress = http://localhost:5298
 
-GET {{UInsure.WebApi.DavidJames_HostAddress}}/policies/
+@baseUrl = http://localhost:5298
+@validPolicyRef = POL-3000
+@unknownPolicyRef = POL-DOES-NOT-EXIST
+
+############################################################
+# SELL POLICY - HAPPY PATH (FULL MODEL)
+############################################################
+POST {{baseUrl}}/api/policies
+Content-Type: application/json
+Accept: application/json
+
+{
+  "uniqueReference": "{{validPolicyRef}}",
+  "startDate": "2026-02-22T00:00:00Z",
+  "endDate": "2027-02-22T00:00:00Z",
+  "amount": 750.00,
+  "hasClaims": false,
+  "autoRenew": true,
+  "policyholders": [
+    {
+      "firstName": "David",
+      "lastName": "James",
+      "dateOfBirth": "1985-04-12T00:00:00Z"
+    }
+  ],
+  "property": {
+    "addressLine1": "10 Dev Street",
+    "addressLine2": "Flat 2",
+    "addressLine3": "Liverpool",
+    "postcode": "L1 1XX"
+  },
+  "paymentType": 0
+}
+
+###
+
+############################################################
+# GET POLICY - SHOULD RETURN FULL OBJECT
+############################################################
+GET {{baseUrl}}/api/policies/{{validPolicyRef}}
 Accept: application/json
 
 ###
+
+############################################################
+# CANCELLATION QUOTE
+############################################################
+GET {{baseUrl}}/api/policies/{{validPolicyRef}}/cancellation-quote?CancellationDate=2026-06-01T00:00:00Z
+Accept: application/json
+
+###
+
+############################################################
+# RENEWAL ELIGIBILITY
+############################################################
+GET {{baseUrl}}/api/policies/{{validPolicyRef}}/renewal-eligibility
+Accept: application/json
+
+###
+
+############################################################
+# RENEW POLICY
+############################################################
+POST {{baseUrl}}/api/policies/{{validPolicyRef}}/renewals
+Accept: application/json
+
+###
+
+############################################################
+# CANCEL POLICY
+############################################################
+POST {{baseUrl}}/api/policies/{{validPolicyRef}}/cancellation
+Content-Type: application/json
+Accept: application/json
+
+{
+  "cancellationDate": "2026-06-01T00:00:00Z"
+}
+
+###
+
+############################################################
+# GET POLICY - AFTER CANCELLATION
+############################################################
+GET {{baseUrl}}/api/policies/{{validPolicyRef}}
+Accept: application/json
+
+###
+
+############################################################
+# NOT FOUND TEST
+############################################################
+GET {{baseUrl}}/api/policies/{{unknownPolicyRef}}
+Accept: application/json

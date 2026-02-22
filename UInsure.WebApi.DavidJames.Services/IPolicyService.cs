@@ -1,5 +1,6 @@
 ﻿using UInsure.WebApi.DavidJames.DataModels;
 using UInsure.WebApi.DavidJames.Models;
+using UInsure.WebApi.DavidJames.Models.Responses;
 
 namespace UInsure.WebApi.DavidJames.Services
 {
@@ -7,7 +8,7 @@ namespace UInsure.WebApi.DavidJames.Services
     {
         Task<decimal> CalculateCancellationRefund(string uniqueReference, DateTime cancellationDate);
         Task<decimal> CancelPolicy(string uniqueReference, DateTime cancellationDate);
-        Task<CanRenewResponseModel> CanRenewPolicy(string uniqueReference);
+        Task<CanRenewResponse> CanRenewPolicy(string uniqueReference);
         Task<PolicyModel> GetPolicy(string uniqueReference);
         Task<Policy> RenewPolicy(string uniqueReference);
         Task<Policy> SellPolicy(PolicyModel policy);

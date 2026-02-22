@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using UInsure.WebApi.DavidJames.DataModels;
 using UInsure.WebApi.DavidJames.Models;
+using UInsure.WebApi.DavidJames.Models.Responses;
 using UInsure.WebApi.DavidJames.Services.Exceptions;
 
 namespace UInsure.WebApi.DavidJames.Services
@@ -130,7 +131,7 @@ namespace UInsure.WebApi.DavidJames.Services
             return CalculateRefund(cancellationDate, policy);
         }
 
-        public async Task<CanRenewResponseModel> CanRenewPolicy(string uniqueReference)
+        public async Task<CanRenewResponse> CanRenewPolicy(string uniqueReference)
         {
             var policy = await _policyRepository.GetByReferenceWithPaymentAsync(uniqueReference)
                 ?? throw new PolicyNotFoundException();
@@ -141,10 +142,10 @@ namespace UInsure.WebApi.DavidJames.Services
             }
             catch (GeneralApiException ex)
             {
-                return new CanRenewResponseModel { CanRenew = false, Reason = ex.Message };
+                return new CanRenewResponse { CanRenew = false, Reason = ex.Message };
             }
 
-            return new CanRenewResponseModel { CanRenew = true };
+            return new CanRenewResponse { CanRenew = true };
         }
 
         private static void ValidatePolicyCanBeRenewed(Policy policy)
