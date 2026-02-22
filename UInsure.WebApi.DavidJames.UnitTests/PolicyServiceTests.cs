@@ -39,6 +39,10 @@ namespace UInsure.WebApi.DavidJames.Tests.Services
                 EndDate = start.AddYears(1),
                 Amount = 500m,
                 PaymentType = paymentType,
+                Property = new PropertyModel
+                {
+                    Postcode = "L9 1LR"
+                },
                 Policyholders = Enumerable.Range(0, holderCount)
                     .Select(_ => new PolicyholderModel
                     {
@@ -65,7 +69,11 @@ namespace UInsure.WebApi.DavidJames.Tests.Services
                 Amount = 500m,
                 HasClaims = hasClaims,
                 AutoRenew = autoRenew,
-                Payment = new Payment { PaymentType = paymentType }
+                Payment = new Payment { PaymentType = paymentType },
+                Property = new Property
+                {
+                    Postcode = "L9 1LR"
+                },
             };
         }
     }

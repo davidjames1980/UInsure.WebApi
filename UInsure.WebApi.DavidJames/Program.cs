@@ -9,22 +9,22 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
-
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddAutoMapper(typeof(Program));
 
+        // Setup our in-memory DB
         builder.Services.AddDbContext<UinsureDbContext>(options =>
             options.UseInMemoryDatabase("UinsureDb"));
 
+        // Setup DI
         builder.Services.AddScoped<IPolicyRepository, PolicyRepository>();
         builder.Services.AddScoped<IPolicyService, PolicyService>();
 
         var app = builder.Build();
 
-        // We could always make this Production to help the consuming devs if they are external, one for later.
+        // We could always make this available in prod to help the consuming devs if they are external, one for later.
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();

@@ -225,6 +225,22 @@ namespace UInsure.WebApi.DavidJames.Tests.Services
                 await act.Should().ThrowAsync<GeneralApiException>()
                     .WithMessage("*over the age of 16*");
             }
+
+            [Test]
+            public async Task SellPolicy_InvalidPostcode_ThrowsGeneralApiException()
+            {
+                // Arrange
+                var model = BuildValidPolicyModel(holderCount: 3);
+                model.Property.Postcode = "12345";
+                _repositoryMock.Setup(r => r.ExistsAsync(model.UniqueReference)).ReturnsAsync(false);
+
+                // Act
+                var act = async () => await _sut.SellPolicy(model);
+
+                // Assert
+                await act.Should().ThrowAsync<GeneralApiException>()
+                    .WithMessage("*postcode is not valid*");
+            }
         }
     }
 }
