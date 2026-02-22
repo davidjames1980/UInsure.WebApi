@@ -18,7 +18,7 @@ namespace UInsure.WebApi.DavidJames.Controllers
     /// In Enterprise we would likely want something more specific and multiple ExceptionTypes.  This also assists us in unit testing.  Expected/business
     /// exceptions can be happily caught and delivered to the caller in informative terms
     /// 
-    /// Unhandled exceptions (expectional exceptions!) we want to flow through to our exception handler and we certainly don't want to be showing
+    /// Unhandled exceptions (expectional exceptions) we want to flow through to our exception handler and we certainly don't want to be showing
     /// call stacks etc so 500 it when not in dev
     /// 
     /// It is completely debatable if UnprocessableEntity 422 is the best result to send but I've chosen this for new based on its definition. 'I cannot complete
@@ -69,7 +69,7 @@ namespace UInsure.WebApi.DavidJames.Controllers
         /// and think everyone works on GMT, UK formats or assuming they are using .NET for that matter. Date-times can be a nightmare
         /// so we are going to use datetime offset and a request model for maintainability
         /// 
-        /// There is also an argument this could be PATCH since I'd image we don't delete the resource.  We would mark it as cancelled
+        /// There is also an argument this could be PATCH since I'd imagine we don't delete the resource.  We would mark it as cancelled or similar.
         /// </summary>
         [HttpPost("{uniqueReference}/cancellation")]
         public async Task<IActionResult> CancelPolicy(string uniqueReference, [FromBody] CancelPolicyRequest cancelPolicyRequest)

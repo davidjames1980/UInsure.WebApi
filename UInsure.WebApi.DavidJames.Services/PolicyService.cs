@@ -44,7 +44,7 @@ namespace UInsure.WebApi.DavidJames.Services
 
         public async Task<decimal> CancelPolicy(string uniqueReference, DateTime cancellationDate)
         {
-            Policy policy = await ValidateCancellationOfPolicyRequest(uniqueReference, cancellationDate);
+            var policy = await GetValidatedPolicyBeforeCancellation(uniqueReference, cancellationDate);
 
             // Full refund if before start date or within the 14-day cool-off period
             if (cancellationDate < policy.StartDate ||
@@ -86,7 +86,7 @@ namespace UInsure.WebApi.DavidJames.Services
 
         public async Task<decimal> CalculateCancellationRefund(string uniqueReference, DateTime cancellationDate)
         {
-            Policy policy = await ValidateCalculateRefundRequest(uniqueReference, cancellationDate);
+            var policy = await GetValidatedPolicyBeforeRefundCalculation(uniqueReference, cancellationDate);
 
             return CalculateRefund(cancellationDate, policy);
         }
@@ -110,12 +110,15 @@ namespace UInsure.WebApi.DavidJames.Services
 
         private static decimal CalculateRefund(DateTime cancellationDate, Policy policy)
         {
+            // Yep, we know the spec says the policy will always be a year but that could change. Lets not hardcode a magic '365'.
+            // Leap years and such.
             var totalPolicyDays = (policy.EndDate.Date - policy.StartDate.Date).Days;
 
             // Using the assumption that the date of cancellation is insured hence the + 1
             var usedDays = (cancellationDate.Date - policy.StartDate.Date).Days + 1;
             var unusedDays = totalPolicyDays - usedDays;
 
+            // Divide the unused days by the total days the policy covered, then multiply by the premium giving the refund.
             var refund = policy.Amount * unusedDays / totalPolicyDays;
 
             return Math.Round(refund, 2, MidpointRounding.AwayFromZero);

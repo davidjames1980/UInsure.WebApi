@@ -36,7 +36,7 @@ namespace UInsure.WebApi.DavidJames.Services
                 throw new GeneralApiException("The provided property postcode is not valid.");
         }
 
-        private async Task<Policy> ValidateCancellationOfPolicyRequest(string uniqueReference, DateTime cancellationDate)
+        private async Task<Policy> GetValidatedPolicyBeforeCancellation(string uniqueReference, DateTime cancellationDate)
         {
             if (cancellationDate.Date < DateTime.UtcNow.Date)
                 throw new GeneralApiException("Cancellation date is in the past.");
@@ -63,7 +63,7 @@ namespace UInsure.WebApi.DavidJames.Services
                 throw new GeneralApiException("Only direct debit and card payment policies can be renewed using this method.");
         }
 
-        private async Task<Policy> ValidateCalculateRefundRequest(string uniqueReference, DateTime cancellationDate)
+        private async Task<Policy> GetValidatedPolicyBeforeRefundCalculation(string uniqueReference, DateTime cancellationDate)
         {
             if (cancellationDate.Date < DateTime.UtcNow.Date)
                 throw new GeneralApiException("Cancellation date is in the past.");
